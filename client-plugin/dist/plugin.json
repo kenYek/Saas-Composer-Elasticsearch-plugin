@@ -1,0 +1,43 @@
+{
+    "name": "MSSQL CS",
+    "id": "mssql-cs",
+    "type": "datasource",
+  
+    "info": {
+      "description": "PostgreSQL Data Source for Grafana",
+      "author": {
+        "name": "Grafana Project",
+        "url": "https://grafana.com"
+      },
+      "logos": {
+        "small": "img/postgresql_logo.svg",
+        "large": "img/postgresql_logo.svg"
+      },
+      "version": "5.0.0"
+    },
+  
+    "saascomposer":{
+      "version":"1.0.0",
+      "componentName":"compElasticSearchDatasource",
+      "sketch":{
+        "privateLibs":[
+          "mssql.js"
+        ]
+      },
+      "management":{
+        "privateLibs":[
+          "source.js"
+        ]
+      }
+    },
+  
+    "alerting": true,
+    "annotations": true,
+    "metrics": true,
+  
+    "queryOptions": {
+      "minInterval": true
+    }
+  
+  }
+  
