@@ -74,7 +74,11 @@ async function getData(req, res) {
       target: data.targets[c].target,
       type: data.targets[c].type,
     };
-    const query = data.targets[c].query ?? {};
+    let query = data.targets[c].query ?? {};
+    if (typeof data.targets[c].query === 'string') {
+      query = JSON.parse(data.targets[c].query)
+    }
+    
     try {
       const response = await client.search({
         index: index,

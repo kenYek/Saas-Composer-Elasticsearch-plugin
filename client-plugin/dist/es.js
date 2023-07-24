@@ -26,44 +26,71 @@ simpleJsonSource.dataBindingUI = function(sourceFormPane, targets) {
 		dataBindingUI.addDataTypeRow(sourceFormPane);
 	}
 	if (targets && targets[0] && targets[0]['sourceType']) {
-		var targetListComboBox = new ht.widget.ComboBox();
+		var target = '';
+        if (targets && targets[0] && targets[0]['target']) {
+            target = targets[0]['target'];
+        }
+        sourceFormPane.addRow([
+            S('target'), {
+                id: 'target',
+                textField: {
+                    text: target
+                }
+            }
+        ], [55, 0.1]);
+        var targetTextArea = new ht.widget.TextArea();
+        targetTextArea.setWidth(90);
+        sourceFormPane.addRow([{
+            element: S('Command')
+        }], [1], 30);
+        sourceFormPane.addRow([{
+            id: 'query',
+            label: 'String',
+            element: targetTextArea,
+            unfocusable: true
+        }], [1], 200);
 
-		// scadaNodeComboBox.setValue(source);
-		targetListComboBox.setWidth(90);
-		targetListComboBox.setDropDownWidth(140);
-		targetListComboBox.setEditable(true);
-		targetListComboBox.onValueChanged = function() {};
-		sourceFormPane.addRow([S('target'), {
-			id: 'target',
-			label: 'String',
-			element: targetListComboBox,
-			unfocusable: true
-		}], [55, 0.1]);
+        if (targets && targets[0] && targets[0]['query']) {
+            targetTextArea.setText(targets[0]['query']);
+        }
+        // var targetListComboBox = new ht.widget.ComboBox();
 
-		dataSourceUtil.sendHttpReqBySourceType(targets[0]['sourceType'], '/search', [], function (response) {
-			if (Array.isArray(response) && response.length > 0) {
-				var values, labels;
-				if (typeof (response[0]) === "string") {
-					values = response,
-						labels = response;
-				} else {
-					values = [], labels = [];
-					for (var i = 0; i < response.length; i++) {
-						values.push(response[i]['text']);
-						labels.push(response[i]['text']);
-					}
-				}
-				targetListComboBox.setValues(values);
-				targetListComboBox.setLabels(response);
-				if (typeof (targets[0]['target']) != "undefined") {
-					targetListComboBox.setValue(targets[0]['target']);
-				} else {
-					targetListComboBox.setValue(values[0]);
-				}
-			}
+		// // scadaNodeComboBox.setValue(source);
+		// targetListComboBox.setWidth(90);
+		// targetListComboBox.setDropDownWidth(140);
+		// targetListComboBox.setEditable(true);
+		// targetListComboBox.onValueChanged = function() {};
+		// sourceFormPane.addRow([S('target'), {
+		// 	id: 'target',
+		// 	label: 'String',
+		// 	element: targetListComboBox,
+		// 	unfocusable: true
+		// }], [55, 0.1]);
 
-			return true;
-		});
+		// dataSourceUtil.sendHttpReqBySourceType(targets[0]['sourceType'], '/search', [], function (response) {
+		// 	if (Array.isArray(response) && response.length > 0) {
+		// 		var values, labels;
+		// 		if (typeof (response[0]) === "string") {
+		// 			values = response,
+		// 				labels = response;
+		// 		} else {
+		// 			values = [], labels = [];
+		// 			for (var i = 0; i < response.length; i++) {
+		// 				values.push(response[i]['text']);
+		// 				labels.push(response[i]['text']);
+		// 			}
+		// 		}
+		// 		targetListComboBox.setValues(values);
+		// 		targetListComboBox.setLabels(response);
+		// 		if (typeof (targets[0]['target']) != "undefined") {
+		// 			targetListComboBox.setValue(targets[0]['target']);
+		// 		} else {
+		// 			targetListComboBox.setValue(values[0]);
+		// 		}
+		// 	}
+
+		// 	return true;
+		// });
 	}
 }
 
@@ -71,12 +98,30 @@ simpleJsonSource.applyDataBindingUI = function(sourceFormPane) {
 	var targets = [];
 	var paneRows = sourceFormPane.getRows();
 	var target = {};
-	for (var i = 0; i < paneRows.length; i++) {
-		if (paneRows[i]['items']) {
-			target[paneRows[i]['items'][1]['id']] = sourceFormPane.v(paneRows[i]['items'][1]['id']);
-		}
-	}
+	// for (var i = 0; i < paneRows.length; i++) {
+	// 	if (paneRows[i]['items']) {
+	// 		target[paneRows[i]['items'][1]['id']] = sourceFormPane.v(paneRows[i]['items'][1]['id']);
+	// 	}
+	// }
+    for (var i = 0; i < paneRows.length; i++) {
+        if (paneRows[i]['items']) {
+            for (var j = 0; j < paneRows[i]['items'].length; j++) {
+                if(paneRows[i]['items'][j]['id']){
+                    // target[paneRows[i]['items'][j]['id']] = sourceFormPane.v(paneRows[i]['items'][j]['id']);
+                    if (sourceFormPane.v(paneRows[i]['items'][j]['id'])) {
+                        target[paneRows[i]['items'][j]['id']] = sourceFormPane.v(paneRows[i]['items'][j]['id']);
+                    }else {
+                        var msg = paneRows[i]['items'][j]['id'] == 'target'?"ERROR: The target cannot be empty!!!":"ERROR: The command cannot be empty!!!"
+                        editor.showMessage(msg,"error",3000);
+                        throw msg
+                    }
+                }
+            }
+        }
+    }
 	targets.push(target);
+    console.log('paneRows:', paneRows)
+    console.log('targets:', targets)
 	return targets;
 };
 
