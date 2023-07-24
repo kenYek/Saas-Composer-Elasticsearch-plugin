@@ -1,13 +1,13 @@
 {
-    "name": "MSSQL CS",
-    "id": "mssql-cs",
+    "name": "ElasticSearch CS",
+    "id": "elasticsearch-cs",
     "type": "datasource",
   
     "info": {
-      "description": "PostgreSQL Data Source for Grafana",
+      "description": "",
       "author": {
-        "name": "Grafana Project",
-        "url": "https://grafana.com"
+        "name": "",
+        "url": ""
       },
       "logos": {
         "small": "img/postgresql_logo.svg",
@@ -21,7 +21,7 @@
       "componentName":"compElasticSearchDatasource",
       "sketch":{
         "privateLibs":[
-          "mssql.js"
+          "es.js"
         ]
       },
       "management":{

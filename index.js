@@ -13,7 +13,7 @@ app.use(express.json());
 const port = config.port || 3500;
 
 // 獲取索引的 Mapping
-async function getIndexMapping(index) {
+async function getIndexMapping(client, index) {
   try {
     const response = await client.indices.getMapping({
       index: index,
@@ -26,8 +26,9 @@ async function getIndexMapping(index) {
 }
 
 // 列出索引中所有字段
-async function listAllFields(index) {
-  const mapping = await getIndexMapping(index);
+async function listAllFields(client, index) {
+  const mapping = await getIndexMapping(client, index);
+  console.error('Mapping：', index, mapping);
   if (mapping && mapping[index] && mapping[index].mappings) {
     const properties = mapping[index].mappings.properties;
     // const fields = Object.keys(properties);
@@ -51,28 +52,40 @@ async function getData(req, res) {
   r.errCode = 0;
   r.data = [];
 
+  // console.log(data.url)
+  // console.log(jsonData.url)
+  // console.log(jsonData.useConnectJson)
+  // console.log(jsonData.connectJson)
+
   const connectOption = {
     node: jsonData.url
   }
+  const index = jsonData.index;
 
-  const client = new Client(connectOption);
+  let client = '';
+  if (jsonData.useConnectJson) {
+    client = new Client(JSON.parse(jsonData.connectJson));
+  } else {
+    client = new Client(connectOption);
+  }
 
   for (let c = 0; c < data.targets.length; c++) {
     const item = {
       target: data.targets[c].target,
       type: data.targets[c].type,
     };
+    const query = data.targets[c].query ?? {};
     try {
       const response = await client.search({
         index: index,
         body: query,
       });
-      if (esponse?.hits?.hits) {
+      if (response?.hits?.hits && index) {
         const dataObjects = response.hits.hits
         // response.hits.hits
         if (data.targets[c].type === 'table') {
           // 列出索引中所有字段
-          const fields = await listAllFields(index);
+          const fields = await listAllFields(client, index);
           item.columns = fields;
           item.rows = []
           const convertedArray = dataObjects.map((obj) => {
@@ -98,7 +111,19 @@ async function getData(req, res) {
 }
 
 app.all('/', (req, res) => {
-  res.send('Hello World!')
+  if (req.json_data) {
+    const jsonData = req.json_data;
+    if (jsonData.index && jsonData.url) {
+      res.json({
+        errCode: 0,
+        status: 'success'
+      });
+    }
+  }
+  res.json({
+    errCode: 300,
+    status: 'fail'
+  });
 })
 
 app.post('/query', getData)
